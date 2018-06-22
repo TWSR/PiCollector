@@ -95,7 +95,8 @@ function http_get_data(req, res) {
     data.geo = geos;
     fs.unlinkSync("./data/geo.log");
   }
-  res.send(JSON.stringify(data));
+  res.send(JSON.stringify(data).replace(/","/g, '",</br>"')
+    .replace(/\],"/g, '],<br/>"'));
 }
 
 httpServer.listen(configs.port_number, function() {
