@@ -1,0 +1,4 @@
+1. Make sure you have "sudo" privilege
+2. run "./scripts/prepare.sh"
+3. run "sudo ./scripts/run.sh"
+
