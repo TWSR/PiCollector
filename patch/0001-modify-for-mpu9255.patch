@@ -1,0 +1,25 @@
+From 2f4b97bcb7f08af559d64ee3912b25702c8d6c81 Mon Sep 17 00:00:00 2001
+From: Audi Hsu <audihsu@gmail.com>
+Date: Fri, 22 Jun 2018 16:19:44 +0000
+Subject: [PATCH] modify for mpu9255
+
+---
+ mpu9250.js | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/mpu9250.js b/mpu9250.js
+index 837b165..0062267 100644
+--- a/mpu9250.js
++++ b/mpu9250.js
+@@ -286,7 +286,7 @@ mpu9250.prototype.initialize = function() {
+  * @return boolean
+  */
+ mpu9250.prototype.testDevice = function() {
+-	return (this.getIDDevice() === 0x71);
++	return (this.getIDDevice() === 0x71) || (this.getIDDevice() === 0x73);
+ };
+ 
+ /**
+-- 
+2.1.4
+

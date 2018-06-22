@@ -51,6 +51,9 @@ function saveNMEA(data) {
 if (mpu.initialize()) {
   setInterval(reading, 17 /* 60 Hz */);
 }
+else {
+  console.log("mpu9255 initialization failed ...");
+}
 
 function reading() {
   var m9 = mpu.getMotion9();

@@ -2,4 +2,6 @@
 *.log
 package-lock.json
 data/*.log
+data/*.pid
+node_modules
 
