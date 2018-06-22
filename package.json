@@ -1,0 +1,17 @@
+{
+  "name": "picollector",
+  "version": "0.0.1",
+  "description": "Pi version GeoAccCollector",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Audi Hsu",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.16.3",
+    "mpu9250": "^0.1.9",
+    "serialport": "^6.2.0"
+  }
+}
