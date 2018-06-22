@@ -74,7 +74,7 @@ function reading() {
   // console.log('MPU VALUE : ', m9);
   // console.log('Temperature : ' + mpu.getTemperatureCelsius());
   m9.push(date_string_get(new Date()));
-  fs.appendFileSync("./data/acc.log", m9.join(".") + "\n");
+  fs.appendFileSync("./data/acc.log", m9.join(",") + "\n");
 }
 
 mpu_start();
