@@ -42,6 +42,13 @@ function checksumNMEA(str) {
   return c;
 }
 
+function NMEA2Degree(nmea) {
+  var val = parseFloat(nmea);
+  var natural = Math.floor(val/100);
+  var real = (val/100 - natural) * 100 / 60;
+  return natural + real;
+}
+
 function parseNMEA(buf) {
   var s = buf.substring(buf.indexOf("$")+1, buf.indexOf("\r\n"));
   var data = s.substring(0, s.indexOf("*"));
@@ -51,13 +58,13 @@ function parseNMEA(buf) {
   if (checksum === checksumNMEA(data) && data.indexOf("GPGGA") > -1) {
     var arr = data.split(",");
     var lat = arr[2], lon = arr[4], alt = arr[9];
-    if (lat === "" || lon === "" || alt === "")
+    if (lat === "" || lon === "")
       return false;
 
     var date = date_string_get(new Date());
     var geo = {
-      latitude: lat,
-      longitude: lon,
+      latitude: NMEA2Degree(lat),
+      longitude: NMEA2Degree(lon),
       altitude: alt,
       number_satellites: arr[7],
       hdop: arr[8],
@@ -119,22 +126,25 @@ function http_get_data(req, res) {
   if (fs.existsSync("./data/mot.log")) {
     var mot = fs.readFileSync("./data/mot.log", { encoding: "utf8" });
     mots = mot.trim().split("\n");
-    data.mot = mots;
+    data.mot = [];
+    mots.forEach(function(mot) { data.mot.push(JSON.parse(mot)) });
     fs.unlinkSync("./data/mot.log");
   }
   if (fs.existsSync("./data/ori.log")) {
     var ori = fs.readFileSync("./data/ori.log", { encoding: "utf8" });
     oris = ori.trim().split("\n");
-    data.ori = oris;
+    data.ori = [];
+    oris.forEach(function(ori) { data.ori.push(JSON.parse(ori)) });
     fs.unlinkSync("./data/ori.log");
   }
   if (fs.existsSync("./data/geo.log")) {
     var geo = fs.readFileSync("./data/geo.log", { encoding: "utf8" });
     geos = geo.trim().split("\n");
-    data.geo = geos;
+    data.geo = [];
+    geos.forEach(function(geo) { data.geo.push(JSON.parse(geo)) });
     fs.unlinkSync("./data/geo.log");
   }
-  res.send(JSON.stringify(data).replace(/","/g, '",</br>"')
+  res.send(JSON.stringify(data).replace(/},{/g, '},</br>{')
     .replace(/\],"/g, '],<br/>"'));
 }
 
