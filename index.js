@@ -127,21 +127,33 @@ function http_get_data(req, res) {
     var mot = fs.readFileSync("./data/mot.log", { encoding: "utf8" });
     mots = mot.trim().split("\n");
     data.mot = [];
-    mots.forEach(function(mot) { data.mot.push(JSON.parse(mot)) });
+    mots.forEach(function(mot) {
+      try {
+        data.mot.push(JSON.parse(mot));
+      } catch(e) {}
+    });
     fs.unlinkSync("./data/mot.log");
   }
   if (fs.existsSync("./data/ori.log")) {
     var ori = fs.readFileSync("./data/ori.log", { encoding: "utf8" });
     oris = ori.trim().split("\n");
     data.ori = [];
-    oris.forEach(function(ori) { data.ori.push(JSON.parse(ori)) });
+    oris.forEach(function(ori) {
+      try {
+        data.ori.push(JSON.parse(ori));
+      } catch(e) {}
+    });
     fs.unlinkSync("./data/ori.log");
   }
   if (fs.existsSync("./data/geo.log")) {
     var geo = fs.readFileSync("./data/geo.log", { encoding: "utf8" });
     geos = geo.trim().split("\n");
     data.geo = [];
-    geos.forEach(function(geo) { data.geo.push(JSON.parse(geo)) });
+    geos.forEach(function(geo) {
+      try {
+        data.geo.push(JSON.parse(geo));
+      } catch(e) {}
+    });
     fs.unlinkSync("./data/geo.log");
   }
   res.send(JSON.stringify(data).replace(/},{/g, '},</br>{')
