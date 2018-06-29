@@ -22,6 +22,7 @@ dtoverlay=i2c-gpio,i2c_gpio_sda=10,i2c_gpio_scl=9
    PINOUT 17(3V3)-19(GPIO10)-21(GPIO9)-23(GPIO11)-25(GND)
 
 3. add /etc/modules
+i2c-dev
 rtc-ds1307
 
 4. add rc.local
