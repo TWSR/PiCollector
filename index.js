@@ -1,10 +1,18 @@
 var configs = require("./config.json");
 var fs = require("fs");
+var uuidv1 = require("uuid/v1");
 var http = require("http");
 var express = require("express");
 var app = express();
 var mpu9250 = require("mpu9250");
 var SerialPort = require("serialport");
+
+if (!configs.uuid) {
+  var mac_address = mac_address_get();
+  var uuid = uuid_get(mac_address);
+  configs.uuid = uuid;
+  save_configs();
+}
 
 if (typeof configs.mpu.address === "string")
   configs.mpu.address = parseInt(configs.mpu.address, 16);
@@ -34,6 +42,34 @@ function date_string_get(date) {
 		+ ":" + ("00"+date.getMinutes()).substr(-2,2)
 		+ ":" + ("00"+date.getSeconds()).substr(-2,2)
 		+ "." + ("000"+date.getMilliseconds()).substr(-3,3);
+}
+
+function uuid_get(mac_address) {
+	return uuidv1({
+		node: mac_address.split(":").map(function(x) { return parseInt(x, 16) }),
+		clockseq: 0x8888,
+		msecs: new Date("2017-08-08").getTime(),
+		nsecs: 9999
+	});
+}
+
+function mac_address_get() {
+  var mac_address = "00:aa:bb:cc:dd:ee";
+
+  if (fs.existsSync("/sys/class/net/eth0/address")) {
+    mac_address = fs.readFileSync("/sys/class/net/eth0/address", { encoding: "utf8" });
+  }
+
+  console.log("mac_address: ", mac_address);
+
+  return mac_address;
+}
+
+function save_configs() {
+  fs.writeFileSync("./config.json", JSON.stringify(configs, null, 2 /* indent 2 spaces */), {
+    encoding: "utf8",
+    mode: parseInt("0400", 8)
+  });
 }
 
 function checksumNMEA(str) {

@@ -12,6 +12,7 @@
   "dependencies": {
     "express": "^4.16.3",
     "mpu9250": "^0.1.9",
-    "serialport": "^6.2.0"
+    "serialport": "^6.2.0",
+    "uuid": "3.1.0"
   }
 }
