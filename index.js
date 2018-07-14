@@ -154,7 +154,37 @@ function mpu_reading() {
 }
 
 mpu_start();
+app.get("/", function(req, res) {
+  res.send("<h1>PiCollector works!</h1>");
+});
+
+app.get("/help", http_get_help);
+app.get("/config", http_get_config);
+app.get("/name/:value", http_get_name);
+app.get("/vehicle/:value", http_get_vehicle);
 app.get("/data", http_get_data);
+
+function http_get_config(req, res) {
+  res.send(JSON.stringify(configs, null, 4));
+}
+
+function http_get_help(req, res) {
+  res.send(
+    "/help -> show this help<br/>" +
+    "/config -> show device config<br/>" +
+    "/name/:value -> get/set device name<br/>" +
+    "/vehicle/:value -> get/set vehicle type<br/>" +
+    "/data -> retrieve data saved in sd card, and remove them"
+  );
+}
+
+function http_get_name(req, res) {
+  res.send();
+}
+
+function http_get_vehicle(req, res) {
+  res.send();
+}
 
 function http_get_data(req, res) {
   var data = {};
@@ -195,6 +225,7 @@ function http_get_data(req, res) {
   res.send(JSON.stringify(data).replace(/},{/g, '},</br>{')
     .replace(/\],"/g, '],<br/>"'));
 }
+
 
 httpServer.listen(configs.port_number, function() {
   console.log("http listening 0.0.0.0:" + configs.port_number);
