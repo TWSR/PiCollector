@@ -16,18 +16,18 @@
 
 ### RTC DS3231 module
 1. add /boot/config.txt
-dtoverlay=i2c-gpio,i2c_gpio_sda=10,i2c_gpio_scl=9
+ - dtoverlay=i2c-gpio,i2c_gpio_sda=10,i2c_gpio_scl=9
 
 2. connect ds3231 module (+) -> (-) to
-   PINOUT 17(3V3)-19(GPIO10)-21(GPIO9)-23(GPIO11)-25(GND)
+ - PINOUT 17(3V3)-19(GPIO10)-21(GPIO9)-23(GPIO11)-25(GND)
 
 3. add /etc/modules
-i2c-dev
-rtc-ds1307
+ - i2c-dev
+ - rtc-ds1307
 
 4. add rc.local
-echo ds1307 0x68 > /sys/class/i2c-adapter/i2c-3/new_device
-hwclock -s
+ - echo ds1307 0x68 > /sys/class/i2c-adapter/i2c-3/new_device
+ - hwclock -s
 
 ### Wifi setting notes:
 1. scan wifi BSSID
