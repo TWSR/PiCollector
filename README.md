@@ -40,16 +40,17 @@ hwclock -s
  - reference:
    http://alexba.in/blog/2015/01/14/automatically-reconnecting-wifi-on-a-raspberrypi/
  - add /usr/local/bin/wifi_rebooter.sh
-```
-#!/bin/bash
 
-# The IP for the server you wish to ping (8.8.8.8 is a public Google DNS server)
+```
+\#!/bin/bash
+
+\# The IP for the server you wish to ping (8.8.8.8 is a public Google DNS server)
 SERVER=8.8.8.8
 
-# Only send two pings, sending output to /dev/null
+\# Only send two pings, sending output to /dev/null
 ping -c2 ${SERVER} > /dev/null
 
-# If the return code from ping ($?) is not 0 (meaning there was an error)
+\# If the return code from ping ($?) is not 0 (meaning there was an error)
 if [ $? != 0 ]
 then
     # Restart the wireless interface
