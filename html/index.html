@@ -1,0 +1,42 @@
+<html>
+<head>
+  <title>PiCollector Configurations</title>
+  <script type="text/javascript" src="js/jquery.js"></script>
+  <script type="text/javascript">
+    $(function() {
+      [ "name", "vehicle", "push_raw", "push" ].forEach(function(field) {
+        $.get("/" + field, function(data) {
+          $("input[name=" + field + "]").val(data);
+        });
+      });
+
+      $("input[type=text]").blur(function(event) {
+        var input = $(event.target);
+        var value = input.val();
+        var name = input.attr("name");
+        if (name.indexOf("push") > -1) {
+          value = encodeURIComponent(value);
+        }
+        $.get("/" + name + "/" + value, function(data) {
+          $("input[name=" + field + "]").val(data);
+        });
+      });
+
+      $("input[name=name]").focus();
+    });
+  </script>
+  <style>
+    div { padding: 0.2em 1em; }
+    label { width: 10em; display: inline-block }
+    input[type=text] { width: 50em; }
+  </style>
+</head>
+<body>
+  <div><label for="name">Name: </label><input type="text" name="name"/></div>
+  <div><label for="vehicle">Vehicle:</label><input type="text" name="vehicle"/></div>
+  <div><label for="push_raw">Push Raw Url: </label><input type="text" name="push_raw"/></div>
+  <div><label for="push">Push Url: </label><input type="text" name="push"/></div>
+  <div><input type="button" value="OK" /></div>
+</body>
+</html>
+

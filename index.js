@@ -154,36 +154,49 @@ function mpu_reading() {
 }
 
 mpu_start();
-app.get("/", function(req, res) {
-  res.send("<h1>PiCollector works!</h1>");
-});
+app.use("/", express.static(__dirname + "/html"));
 
-app.get("/help", http_get_help);
 app.get("/config", http_get_config);
-app.get("/name/:value", http_get_name);
-app.get("/vehicle/:value", http_get_vehicle);
+app.get("/name/:value?", http_get_name);
+app.get("/vehicle/:value?", http_get_vehicle);
+app.get("/push_raw/:url?", http_get_push_raw);
+app.get("/push/:url?", http_get_push);
 app.get("/data", http_get_data);
 
 function http_get_config(req, res) {
   res.send(JSON.stringify(configs, null, 4));
 }
 
-function http_get_help(req, res) {
-  res.send(
-    "/help -> show this help<br/>" +
-    "/config -> show device config<br/>" +
-    "/name/:value -> get/set device name<br/>" +
-    "/vehicle/:value -> get/set vehicle type<br/>" +
-    "/data -> retrieve data saved in sd card, and remove them"
-  );
-}
-
 function http_get_name(req, res) {
-  res.send();
+  if (req.params.value) {
+    configs.name = req.params.value;
+    save_configs();
+  }
+  res.send(configs.name);
 }
 
 function http_get_vehicle(req, res) {
-  res.send();
+  if (req.params.value) {
+    configs.vehicle = req.params.value;
+    save_configs();
+  }
+  res.send(configs.vehicle);
+}
+
+function http_get_push_raw(req, res) {
+  if (req.params.url) {
+    configs.push_raw_url = req.params.url;
+    save_configs();
+  }
+  res.send(configs.push_raw_url);
+}
+
+function http_get_push(req, res) {
+  if (req.params.url) {
+    configs.push_url = req.params.url;
+    save_configs();
+  }
+  res.send(configs.push_url);
 }
 
 function http_get_data(req, res) {
