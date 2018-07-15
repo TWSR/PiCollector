@@ -1,11 +1,15 @@
 var configs = require("./config.json");
 var fs = require("fs");
 var uuidv1 = require("uuid/v1");
+var url = require("url");
 var http = require("http");
+var https = require("https");
 var express = require("express");
 var app = express();
 var mpu9250 = require("mpu9250");
 var SerialPort = require("serialport");
+
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
 if (!configs.uuid) {
   var mac_address = mac_address_get();
@@ -202,44 +206,120 @@ function http_get_push(req, res) {
 function http_get_data(req, res) {
   var data = {};
 
-  if (fs.existsSync("./data/mot.log")) {
-    var mot = fs.readFileSync("./data/mot.log", { encoding: "utf8" });
-    mots = mot.trim().split("\n");
-    data.mot = [];
-    mots.forEach(function(mot) {
-      try {
-        data.mot.push(JSON.parse(mot));
-      } catch(e) {}
-    });
-    fs.unlinkSync("./data/mot.log");
-  }
-  if (fs.existsSync("./data/ori.log")) {
-    var ori = fs.readFileSync("./data/ori.log", { encoding: "utf8" });
-    oris = ori.trim().split("\n");
-    data.ori = [];
-    oris.forEach(function(ori) {
-      try {
-        data.ori.push(JSON.parse(ori));
-      } catch(e) {}
-    });
-    fs.unlinkSync("./data/ori.log");
-  }
-  if (fs.existsSync("./data/geo.log")) {
-    var geo = fs.readFileSync("./data/geo.log", { encoding: "utf8" });
-    geos = geo.trim().split("\n");
-    data.geo = [];
-    geos.forEach(function(geo) {
-      try {
-        data.geo.push(JSON.parse(geo));
-      } catch(e) {}
-    });
-    fs.unlinkSync("./data/geo.log");
-  }
+  data.mot = get_saved_data("mot");
+  data.ori = get_saved_data("ori");
+  data.geo = get_saved_data("geo");
+
+  remove_saved_data("mot");
+  remove_saved_data("ori");
+  remove_saved_data("geo");
+
   res.send(JSON.stringify(data).replace(/},{/g, '},</br>{')
     .replace(/\],"/g, '],<br/>"'));
 }
 
+function move_saved_data_to_temp_data(type) {
+  if (typeof type !== "string") return data;
+  var path = "./data/" + type + ".log";
+  var temp_path = "./data/" + type + "_temp.log";
+  if (fs.existsSync(path)) {
+    var str = fs.readFileSync(path, { encoding: "utf8" });
+    fs.appendFileSync(temp_path, str, { encoding: "utf8" });
+    remove_saved_data(type);
+  }
+}
+
+function get_saved_data(type) {
+  var data = [];
+  if (typeof type !== "string") return data;
+  var path = "./data/" + type + ".log";
+  // console.log("type: ", type);
+  if (fs.existsSync(path)) {
+    var str = fs.readFileSync(path, { encoding: "utf8" });
+    var arr = str.trim().split("\n");
+    // console.log("arr: ", arr);
+    arr.forEach(function(item) {
+      // console.log("item: ", item);
+      data.push(JSON.parse(item));
+    });
+  }
+  return data;
+}
+
+function remove_saved_data(type) {
+  if (typeof type !== "string") return data;
+  var path = "./data/" + type + ".log";
+  if (fs.existsSync(path)) {
+    fs.unlinkSync(path);
+  }
+}
+
+function send_raw_to_server() {
+  try {
+    var send_url = url.parse(configs.push_raw_url);
+    // console.log("send_url: ", send_url);
+    var protocol = http;
+    if (send_url.protocol === "https:") protocol = https;
+    var types = [ "orientations", "motions", "geolocations" ];
+    var short_types = types.map(function(type) { return type.substring(0, 3) });
+    var short_types_temp = short_types.map(function(type) { return type + "_temp" });
+
+    var cookies = "name=" + configs.name + ";" +
+      "vehicle=" + configs.vehicle + ";" +
+      "uuid=" + configs.uuid + ";";
+
+    short_types.forEach(move_saved_data_to_temp_data);
+
+    var req_data = {};
+    for (var i=0;i<types.length;i++) {
+      req_data[types[i]] = get_saved_data(short_types_temp[i]);
+    }
+
+    var post_data = JSON.stringify(req_data);
+
+    var options = {
+      hostname: send_url.hostname,
+      port: send_url.port,
+      path: send_url.path,
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Content-Length": post_data.length,
+        "Cookie": cookies
+      }
+    };
+
+    var request = protocol.request(options, function(res) {
+      console.log("res status: ", res.statusCode);
+
+      var res_data = "";
+      res.on("data", function(chunk) {
+        res_data += chunk;
+      });
+
+      res.on("end", function() {
+        console.log("res_data: ", res_data);
+        if (res.statusCode === 200) {
+          short_types_temp.forEach(remove_saved_data);
+        }
+      });
+    });
+
+    request.on("error", function(e) {
+      console.log("request error: ", e);
+    });
+
+    request.write(post_data);
+    request.end();
+  } catch(e) {
+    console.log(e);
+  }
+}
+
+setInterval(send_raw_to_server, 10000);
+send_raw_to_server();
 
 httpServer.listen(configs.port_number, function() {
   console.log("http listening 0.0.0.0:" + configs.port_number);
 });
+
