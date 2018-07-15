@@ -9,10 +9,10 @@
 
 ### GY-91 module
 1. connect RPI PINOUT to GY-91
-  1(3V3) - 3V3
-  3(I2C1 SDA) - SDA
-  5(I2C1 SCL) - SCL
-  9(GND) - GND
+ - 1(3V3) - 3V3
+ - 3(I2C1 SDA) - SDA
+ - 5(I2C1 SCL) - SCL
+ - 9(GND) - GND
 
 ### RTC DS3231 module
 1. add /boot/config.txt
