@@ -2,7 +2,7 @@
 This is a project using RPI(model 3B, I think other RPIs should work, too),
 GPS(usb to serialport with NMEA), G-sensor(GY-91, contains MPU9255, MPU9250 should work, too)
 to detect non-smooth road.
-[image](https://github.com/TWSR/PiCollector/blob/master/images/picollector.jpeg)
+![PiCollector image](https://github.com/TWSR/PiCollector/blob/master/images/picollector.jpeg)
 
 Use this in your car, scooter, even with your bike.
 
