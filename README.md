@@ -33,7 +33,10 @@ Use this in your car, scooter, even with your bike.
  - i2c-dev
  - rtc-ds1307
 
-4. add rc.local
+4. add or uncomment line in /boot/config.txt
+ - dtparam=i2c_arm=on
+
+5. add rc.local
  - echo ds1307 0x68 > /sys/class/i2c-adapter/i2c-3/new_device
  - hwclock -s
 
