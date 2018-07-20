@@ -6,11 +6,6 @@ to detect non-smooth road.
 
 Use this in your car, scooter, even with your bike.
 
-## Before you run
-1. Make sure you have "sudo" privilege
-2. run "./scripts/prepare.sh"
-3. run "sudo ./scripts/run.sh"
-
 ### GPS G-STAR IV (USB to UART GPS receiver)
 1. connect G-STAR IV to RPI usb port
 2. connect to /dev/ttyUSB0
@@ -73,4 +68,9 @@ fi
 ```
 */2 *   * * *   root    /usr/local/bin/wifi_rebooter.sh
 ```
+
+### Before you run
+1. Make sure you have "sudo" privilege
+2. run "./scripts/prepare.sh"
+3. run "sudo ./scripts/run.sh"
 
