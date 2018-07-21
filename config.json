@@ -1,7 +1,7 @@
 {
   "mpu": {
     "device": "/dev/i2c-1",
-    "address": "0x68",
+    "address": 104,
     "UpMagneto": true,
     "DEBUG": false,
     "GYRO_FS": 0,
@@ -12,7 +12,9 @@
     "baudrate": 4800
   },
   "port_number": 3000,
-  "name": "picollector",
+  "name": "picollector2",
   "vehicle": "car",
-  "uuid": ""
+  "uuid": "856ae70f-7bcc-11e7-8888-b827eb01eafd",
+  "push_raw_url": "https://abc.cytech.tw:7443/recorder",
+  "push_url": "https://abc.cytech.tw:7443/insertDB"
 }
