@@ -99,7 +99,8 @@ mot_filter = function(mot) {
 
                     var d = new Date(mot_cache[0].time.split('.')[0]);
                     var utc = d.getTime() + (d.getTimezoneOffset() * 60000);
-                    var d8 = new Date(utc + (3600000 * 8));
+                    // var d8 = new Date(utc + (3600000 * 8));
+                    var d8 = new Date(utc);
 
                     var postdata = JSON.stringify({
                         //"time": mot_cache[0].time,
