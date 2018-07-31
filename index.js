@@ -129,10 +129,10 @@ function saveNMEA(data) {
         fs.appendFileSync("./data/geo.log", JSON.stringify(data) + "\n");
     }
     var geo = {
-        // latitude: data.latitude,
-        // longitude: data.longitude,
-        latitude: data.latitude + Math.random() / 1000.0,
-        longitude: data.longitude + Math.random() / 1000.0,
+        latitude: data.latitude,
+        longitude: data.longitude,
+        // latitude: data.latitude + Math.random() / 1000.0,
+        // longitude: data.longitude + Math.random() / 1000.0,
         altitude: data.altitude,
         accuracy: data.hdop,
         time: data.time
