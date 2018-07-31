@@ -9,8 +9,9 @@ var app = express();
 var mpu9250 = require("mpu9250");
 var SerialPort = require("serialport");
 var filters = require("./filters.js");
-
 var record_raw = false;
+var fs_led = require("fs");
+var status_ok = true;
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
@@ -128,10 +129,10 @@ function saveNMEA(data) {
         fs.appendFileSync("./data/geo.log", JSON.stringify(data) + "\n");
     }
     var geo = {
-        latitude: data.latitude,
-        longitude: data.longitude,
-        // latitude: data.latitude + Math.random() / 1000.0,
-        // longitude: data.longitude + Math.random() / 1000.0,
+        // latitude: data.latitude,
+        // longitude: data.longitude,
+        latitude: data.latitude + Math.random() / 1000.0,
+        longitude: data.longitude + Math.random() / 1000.0,
         altitude: data.altitude,
         accuracy: data.hdop,
         time: data.time
@@ -143,7 +144,7 @@ function saveNMEA(data) {
 function mpu_start() {
     if (mpu.initialize()) {
         setInterval(mpu_reading, 17 /* 60 Hz */ );
-    } else {
+    } else {        
         console.log("mpu9255 initialization failed ...");
     }
 }
@@ -416,3 +417,21 @@ send_index_to_server();
 httpServer.listen(configs.port_number, function() {
     console.log("http listening 0.0.0.0:" + configs.port_number);
 });
+
+setInterval(() => {
+    if(status_ok){
+        var brightness = parseInt(fs_led.readFileSync('/sys/class/leds/led1/brightness').toString(), 10);
+        // console.log(brightness);
+        if (brightness == 0) {
+            fs_led.writeFileSync('/sys/class/leds/led1/brightness', '255');
+            fs_led.writeFileSync('/sys/class/leds/led0/brightness', '0');
+        } else {
+            fs_led.writeFileSync('/sys/class/leds/led1/brightness', '0');
+            fs_led.writeFileSync('/sys/class/leds/led0/brightness', '255');
+        }
+    }
+    else{
+        fs_led.writeFileSync('/sys/class/leds/led1/brightness', '255');
+        fs_led.writeFileSync('/sys/class/leds/led0/brightness', '0');
+    }
+  }, 200);

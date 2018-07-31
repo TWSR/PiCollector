@@ -9,7 +9,6 @@ var filter_post_status = "";
 var filter_post_num = 0;
 var configs = require("./config.json");
 
-
 ori_filter = function(ori) {
     ori_cache.push(ori);
     ori_cache.splice(0, ori_cache.length - cache_length);
@@ -101,6 +100,7 @@ mot_filter = function(mot) {
                     var utc = d.getTime() + (d.getTimezoneOffset() * 60000);
                     // var d8 = new Date(utc + (3600000 * 8));
                     var d8 = new Date(utc);
+                    // console.log(d8);
 
                     var postdata = JSON.stringify({
                         //"time": mot_cache[0].time,
