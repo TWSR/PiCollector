@@ -8,6 +8,6 @@ $BASEDIR/scripts/privilege.sh
 su $USER -c " \
   cd $BASEDIR; \
   printf '$DATE\\tPiCollector Start ... \\n' | tee -a data/run.log; \
-  npm start > data/npm_start.log 2>&1 &
+  sudo npm start > data/npm_start.log 2>&1 &
 "
 
