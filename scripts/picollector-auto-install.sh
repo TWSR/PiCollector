@@ -106,6 +106,12 @@ apt-get update
 apt-get install -y vim git i2c-tools
 
 [ -d $(pwd)/PiCollector ] || git clone https://github.com/TWSR/PiCollector
+cp -f $(pwd)/PiCollector/scripts/wifi_rebooter.sh /usr/local/bin/
+grep -q wifi_rebooter /etc/crontab || {
+  echo "Adding wifi_rebooter.sh to crontab every 2 minutes ..."
+  echo "*/2 *   * * *   root    /usr/local/bin/wifi_rebooter.sh" | tee -a /etc/crontab
+}
+
 node -v &> /dev/null || {
   echo "Installing nodejs ..."
   cat PiCollector/scripts/Install-Node.sh | bash
@@ -114,8 +120,3 @@ node -v &> /dev/null || {
 chown -R $USER:$USER $(pwd)/PiCollector
 setcap cap_net_raw+epi $(eval readlink -f `which node`)
 cd $(pwd)/PiCollector && su $USER -c ./scripts/prepare.sh
-cp -f $(pwd)/PiCollector/scripts/wifi_rebooter.sh /usr/local/bin/
-grep -q wifi_rebooter /etc/crontab || {
-  echo "Adding wifi_rebooter.sh to crontab every 2 minutes ..."
-  echo "*/2 *   * * *   root    /usr/local/bin/wifi_rebooter.sh" | tee -a /etc/crontab
-}
