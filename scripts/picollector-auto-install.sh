@@ -99,16 +99,12 @@ service ssh start
 echo "Installing tools ..."
 apt-get update
 apt-get install -y vim git i2c-tools
-node -v &> /dev/null || {
-  wget https://raw.githubusercontent.com/audstanley/NodeJs-Raspberry-Pi/master/Install-Node.sh
-  sed -i 's/v10\.x/v8\.x/g' Install-Node.sh
-  sed -i 's/v10\\\./v8\\\./g' Install-Node.sh
-  cat Install-Node.sh | bash
-  rm Install-Node.sh*
-}
 
 [ -d $(pwd)/PiCollector ] || git clone https://github.com/TWSR/PiCollector
-chmod a+x $(pwd)/PiCollector/scripts/*.sh
+node -v &> /dev/null || {
+  cat PiCollector/scripts/Install-Node.sh | bash
+}
+
 chown -R $USER:$USER $(pwd)/PiCollector
 setcap cap_net_raw+epi $(eval readlink -f `which node`)
 cd $(pwd)/PiCollector && su $USER -c ./scripts/prepare.sh
