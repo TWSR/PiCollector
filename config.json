@@ -14,7 +14,7 @@
   "port_number": 3000,
   "name": "picollector2",
   "vehicle": "car",
-  "uuid": "856ae70f-7bcc-11e7-8888-b827eb01eafd",
+  "uuid": "",
   "push_raw_url": "https://abc.cytech.tw:7443/recorder",
   "push_url": "https://abc.cytech.tw:7443/insertDB"
 }
