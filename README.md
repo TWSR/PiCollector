@@ -6,6 +6,16 @@ to detect non-smooth road.
 
 Use this in your car, scooter, even with your bike.
 
+## Add new auto-install script
+1. Download https://downloads.raspberrypi.org/raspbian_lite/images/raspbian_lite-2018-06-29/2018-06-27-raspbian-stretch-lite.zip
+2. Install image https://www.raspberrypi.org/documentation/installation/installing-images/README.md
+3. copy ./scripts/picollector-auto-install.sh to /boot/picollector-auto-install.sh
+4. login to pi, default username/password is pi/raspberry
+5. exec picollector-auto-install.sh with
+```
+cat /boot/picollector-auto-install.sh | sudo bash
+```
+
 ### GPS G-STAR IV (USB to UART GPS receiver)
 1. connect G-STAR IV to RPI usb port
 2. connect to /dev/ttyUSB0

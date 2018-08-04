@@ -5,7 +5,9 @@
     exit 1
 }
 
-USER=$(stat -c "%U" $(realpath $0))
+USER=$(stat -c "%U" $(pwd))
+WPA_USER="BSSID"
+WPA_PASS="WIFIPASS"
 
 function set_keyboard() {
   grep -q "us" /etc/default/keyboard && {
@@ -23,7 +25,8 @@ XKBOPTIONS="lv3:ralt_alt"
 
 BACKSPACE="guess"
 EOF
-    echo "Setting keyboard to US style done. Reboot to take effect ..."
+    setupcon
+    echo "Setting keyboard to US style done ..."
   }
 }
 
@@ -43,14 +46,16 @@ EOF
 }
 
 function set_wifi() {
-  WPA_USER="BSSID"
-  WPA_PASS="WIFIPASS"
-
   grep -q $WPA_USER /etc/wpa_supplicant/wpa_supplicant.conf && {
     echo "No need to set wifi ..."
   } || {
     wpa_passphrase $WPA_USER $WPA_PASS | sed -e '/#.*$/d' | tee -a /etc/wpa_supplicant/wpa_supplicant.conf > /dev/null
-    wpa_cli reconfigure
+    wpa_cli -i wlan0 reconfigure
+    echo "Wait for wifi ..."
+    while ! ping -c 1 -n -w 1 8.8.8.8 &> /dev/null; do
+      printf "%c" "."
+    done
+    echo
   }
 }
 
@@ -74,8 +79,9 @@ function add_rclocal() {
   grep -q "ds1307" /etc/rc.local && {
     echo "No need to add rclocal ..."
   } || {
+    sed -i 's/exit 0//g' /etc/rc.local
     printf "echo ds1307 0x68 > /sys/class/i2c-adapter/i2c-3/new_device\nhwclock --hctosys\n" | tee -a /etc/rc.local
-    printf "$(pwd)/PiCollector/scripts/run.sh\n" | tee -a /etc/rc.local
+    printf "$(pwd)/PiCollector/scripts/run.sh\nexit 0\n" | tee -a /etc/rc.local
   }
 }
 
@@ -88,6 +94,7 @@ add_rclocal
 
 echo "Enable ssh ..."
 update-rc.d ssh enable
+service ssh start
 
 echo "Installing tools ..."
 apt-get update
@@ -95,6 +102,7 @@ apt-get install -y vim git i2c-tools
 node -v &> /dev/null || {
   wget https://raw.githubusercontent.com/audstanley/NodeJs-Raspberry-Pi/master/Install-Node.sh
   sed -i 's/v10\.x/v8\.x/g' Install-Node.sh
+  sed -i 's/v10\\\./v8\\\./g' Install-Node.sh
   cat Install-Node.sh | bash
   rm Install-Node.sh*
 }
