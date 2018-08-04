@@ -49,10 +49,12 @@ function set_wifi() {
   grep -q $WPA_USER /etc/wpa_supplicant/wpa_supplicant.conf && {
     echo "No need to set wifi ..."
   } || {
+    echo "Setting wifi WPA_USER=$WPA_USER ..."
     wpa_passphrase $WPA_USER $WPA_PASS | sed -e '/#.*$/d' | tee -a /etc/wpa_supplicant/wpa_supplicant.conf > /dev/null
     wpa_cli -i wlan0 reconfigure
+    echo "If wifi configuration failed, you may modify WPA config and run again ..."
     echo "Wait for wifi ..."
-    while ! ping -c 1 -n -w 1 8.8.8.8 &> /dev/null; do
+    while ! ping -c 1 -n -w 2 8.8.8.8 &> /dev/null; do
       printf "%c" "."
     done
     echo
@@ -63,6 +65,7 @@ function add_boot_config() {
   grep -q "dtoverlay=i2c-gpio" /boot/config.txt && {
     echo "No need to add boot config ..."
   } || {
+    echo "Adding boot config ..."
     printf "dtoverlay=i2c-gpio,i2c_gpio_sda=10,i2c_gpio_scl=9\ndtparam=i2c_arm=on\n" | tee -a /boot/config.txt
   }
 }
@@ -71,6 +74,7 @@ function add_module() {
   grep -q "i2c-dev" /etc/modules && {
     echo "No need to add modules ..."
   } || {
+    echo "Adding /etc/modules ..."
     printf "i2c-dev\nrtc-ds1307\n" | tee -a /etc/modules
   }
 }
@@ -79,6 +83,7 @@ function add_rclocal() {
   grep -q "ds1307" /etc/rc.local && {
     echo "No need to add rclocal ..."
   } || {
+    echo "Adding rc.local ..."
     sed -i 's/exit 0//g' /etc/rc.local
     printf "echo ds1307 0x68 > /sys/class/i2c-adapter/i2c-3/new_device\nhwclock --hctosys\n" | tee -a /etc/rc.local
     printf "$(pwd)/PiCollector/scripts/run.sh\nexit 0\n" | tee -a /etc/rc.local
@@ -102,10 +107,15 @@ apt-get install -y vim git i2c-tools
 
 [ -d $(pwd)/PiCollector ] || git clone https://github.com/TWSR/PiCollector
 node -v &> /dev/null || {
+  echo "Installing nodejs ..."
   cat PiCollector/scripts/Install-Node.sh | bash
 }
 
 chown -R $USER:$USER $(pwd)/PiCollector
 setcap cap_net_raw+epi $(eval readlink -f `which node`)
 cd $(pwd)/PiCollector && su $USER -c ./scripts/prepare.sh
-
+cp -f $(pwd)/PiCollector/scripts/wifi_rebooter.sh /usr/local/bin/
+grep -q wifi_rebooter /etc/crontab || {
+  echo "Adding wifi_rebooter.sh to crontab every 2 minutes ..."
+  echo "*/2 *   * * *   root    /usr/local/bin/wifi_rebooter.sh" | tee -a /etc/crontab
+}
