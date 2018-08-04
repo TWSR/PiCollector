@@ -14,9 +14,10 @@ Use this in your car, scooter, even with your bike.
 5. login to pi, default username/password is pi/raspberry
 6. exec picollector-auto-install.sh with
 ```
-cat /boot/picollector-auto-install.sh | sudo bash
+sudo /boot/picollector-auto-install.sh
 ```
 P.S. remember to change CrLf to Lf while you are using windows
+7. reboot to take effect
 
 ### GPS G-STAR IV (USB to UART GPS receiver)
 1. connect G-STAR IV to RPI usb port
