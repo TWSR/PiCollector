@@ -10,10 +10,14 @@ var mpu9250 = require("mpu9250");
 var SerialPort = require("serialport");
 var filters = require("./filters.js");
 var record_raw = false;
-var fs_led = require("fs");
 var status_ok = true;
 
+// https send without tls check
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+
+// default set green led on
+fs.writeFileSync("/sys/class/leds/led0/trigger", "none");
+fs.writeFileSync("/sys/class/leds/led0/brightness", "255");
 
 if (!configs.uuid) {
     var mac_address = mac_address_get();
@@ -40,6 +44,11 @@ serialport.on("data", function(data) {
         }
         sp_buffer = sp_buffer.slice(sp_buffer.indexOf("\r\n") + 2);
     }
+});
+
+serialport.on("error", function(error) {
+    console.log("serialport error:", error);
+    process.exit(1);
 });
 
 function date_string_get(date) {
@@ -146,6 +155,7 @@ function mpu_start() {
         setInterval(mpu_reading, 17 /* 60 Hz */ );
     } else {        
         console.log("mpu9255 initialization failed ...");
+        process.exit(1);
     }
 }
 
@@ -425,7 +435,7 @@ httpServer.listen(configs.port_number, function() {
 
 var green_led_on_timeout = 800;
 var green_led_off_timeout = 200;
-fs.writeFileSync("/sys/class/leds/led0/trigger", "none");
+
 function green_led_blink() {
     fs.writeFileSync("/sys/class/leds/led0/brightness", "255");
     setTimeout(function() {
