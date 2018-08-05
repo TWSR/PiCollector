@@ -331,6 +331,7 @@ function send_index_to_server() {
 
                 res.on("end", function() {
                     // console.log("res_data: ", res_data);
+                    green_led_blink_normal();
                     if (res.statusCode === 200) {
                         short_types_temp.forEach(remove_saved_data);
                     }
@@ -341,6 +342,7 @@ function send_index_to_server() {
                 console.log("request error: ", e);
             });
 
+            green_led_blink_fast();
             request.write(pdata);
             request.end();
         });
@@ -411,6 +413,7 @@ function send_raw_to_server() {
         console.log(e);
     }
 }
+
 setInterval(send_raw_to_server, 10000);
 setInterval(send_index_to_server, 10000);
 send_raw_to_server();
@@ -420,20 +423,23 @@ httpServer.listen(configs.port_number, function() {
     console.log("http listening 0.0.0.0:" + configs.port_number);
 });
 
-setInterval(() => {
-    if(status_ok){
-        var brightness = parseInt(fs_led.readFileSync('/sys/class/leds/led1/brightness').toString(), 10);
-        // console.log(brightness);
-        if (brightness == 0) {
-            fs_led.writeFileSync('/sys/class/leds/led1/brightness', '255');
-            fs_led.writeFileSync('/sys/class/leds/led0/brightness', '0');
-        } else {
-            fs_led.writeFileSync('/sys/class/leds/led1/brightness', '0');
-            fs_led.writeFileSync('/sys/class/leds/led0/brightness', '255');
-        }
-    }
-    else{
-        fs_led.writeFileSync('/sys/class/leds/led1/brightness', '255');
-        fs_led.writeFileSync('/sys/class/leds/led0/brightness', '0');
-    }
-  }, 200);
+var green_led_on_timeout = 800;
+var green_led_off_timeout = 200;
+fs.writeFileSync("/sys/class/leds/led0/trigger", "none");
+function green_led_blink() {
+    fs.writeFileSync("/sys/class/leds/led0/brightness", "255");
+    setTimeout(function() {
+        fs.writeFileSync("/sys/class/leds/led0/brightness", "0");
+    }, green_led_on_timeout);
+    setTimeout(green_led_blink, green_led_on_timeout + green_led_off_timeout);
+}
+green_led_blink();
+
+function green_led_blink_fast() {
+    green_led_on_timeout = 200;
+}
+
+function green_led_blink_normal() {
+    green_led_on_timeout = 800;
+}
+
