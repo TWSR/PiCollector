@@ -40,7 +40,11 @@ function set_locale() {
 LANG=en_US.UTF-8
 LC_ALL=C
 EOF
-    locale-gen en_US.UTF-8
+    echo zh_TW BIG5 | tee -a /etc/locale.gen
+    echo zh_TW.UTF-8 UTF-8 | tee -a /etc/locale.gen
+    echo en_US ISO-8859-1 | tee -a /etc/locale.gen
+    echo en_US.UTF-8 UTF-8 | tee -a /etc/locale.gen
+    locale-gen
     echo "Setting en_US.UTF-8 locale done."
   }
 }

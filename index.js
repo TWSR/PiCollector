@@ -291,6 +291,7 @@ function remove_saved_data(type) {
 
 function send_index_to_server() {
     try {
+	if (!configs.push_url) return;
         var send_url = url.parse(configs.push_url);
         // console.log("send_url: ", send_url);
         var protocol = http;
@@ -350,6 +351,7 @@ function send_index_to_server() {
 
 function send_raw_to_server() {
     try {
+	if (!configs.push_raw_url) return;
         var send_url = url.parse(configs.push_raw_url);
         var protocol = http;
         if (send_url.protocol === "https:") protocol = https;
