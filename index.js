@@ -265,9 +265,11 @@ function move_saved_data_to_temp_data(type) {
     if (typeof type !== "string") return data;
     var path = "./data/" + type + ".log";
     var temp_path = "./data/" + type + "_temp.log";
+    var saved_path = "./data/" + type + "_saved.log";
     if (fs.existsSync(path)) {
         var str = fs.readFileSync(path, { encoding: "utf8" });
         fs.appendFileSync(temp_path, str, { encoding: "utf8" });
+        fs.appendFileSync(saved_path, str, { encoding: "utf8" });
         remove_saved_data(type);
     }
 }
