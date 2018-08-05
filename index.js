@@ -268,8 +268,15 @@ function move_saved_data_to_temp_data(type) {
     var saved_path = "./data/" + type + "_saved.log";
     if (fs.existsSync(path)) {
         var str = fs.readFileSync(path, { encoding: "utf8" });
-        fs.appendFileSync(temp_path, str, { encoding: "utf8" });
-        fs.appendFileSync(saved_path, str, { encoding: "utf8" });
+        var arr = str.split("\n");
+        var data = [];
+        arr.forEach(function(item) {
+            try {
+                data.push(JSON.parse(item));
+            } catch(e) {}
+	});
+        fs.appendFileSync(temp_path, data.map(JSON.stringify).join("\n") + "\n", { encoding: "utf8" });
+        fs.appendFileSync(saved_path, data.map(JSON.stringify).join("\n") + "\n", { encoding: "utf8" });
         remove_saved_data(type);
     }
 }
