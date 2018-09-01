@@ -15,6 +15,6 @@
   "name": "picollector2",
   "vehicle": "car",
   "uuid": "",
-  "push_raw_url": "https://abc.cytech.tw:7443/recorder",
-  "push_url": "https://abc.cytech.tw:7443/insertDB"
+  "push_raw_url": "https://collector.twsr.xyz/recorder",
+  "push_url": "https://collector.twsr.xyz/insertDB"
 }
