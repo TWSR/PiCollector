@@ -1,20 +1,20 @@
 {
-  "mpu": {
-    "device": "/dev/i2c-1",
-    "address": 104,
-    "UpMagneto": true,
-    "DEBUG": false,
-    "GYRO_FS": 0,
-    "ACCEL_FS": 1
-  },
-  "gps": {
-    "device": "/dev/ttyUSB0",
-    "baudrate": 4800
-  },
-  "port_number": 3000,
-  "name": "picollector2",
-  "vehicle": "car",
-  "uuid": "",
-  "push_raw_url": "https://collector.twsr.xyz/recorder",
-  "push_url": "https://collector.twsr.xyz/insertDB"
+    "mpu": {
+        "device": "/dev/i2c-1",
+        "address": 104,
+        "UpMagneto": true,
+        "DEBUG": false,
+        "GYRO_FS": 0,
+        "ACCEL_FS": 1
+    },
+    "gps": {
+        "device": "/dev/ttyUSB0",
+        "baudrate": 4800
+    },
+    "port_number": 3000,
+    "name": "picollector2",
+    "vehicle": "car",
+    "uuid": "",
+    "push_raw_url": "https://collector.flataiwan.com/recorder",
+    "push_url": "https://collector.flataiwan.com/insertDB"
 }
