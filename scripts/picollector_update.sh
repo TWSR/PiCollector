@@ -13,7 +13,8 @@ cd $BASEDIR
   now=$(date '+[%Y/%m/%d %H:%M:%S]')
   echo "${now}\tpatch found from github, updating ..." | tee -a data/update.log
   fuser -k 3000/tcp | tee -a data/update.log
-  su $USER -c "cd $BASEDIR; git pull | tee -a data/update.log"
+  su $USER -c "cd $BASEDIR; git pull" | tee -a data/update.log
+  chown $USER:$USER data/update.log
   $BASEDIR/scripts/run.sh
 }
 
