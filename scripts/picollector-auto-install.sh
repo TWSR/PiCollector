@@ -116,6 +116,11 @@ grep -q wifi_rebooter /etc/crontab || {
   echo "*/2 *   * * *   root    /usr/local/bin/wifi_rebooter.sh" | tee -a /etc/crontab
 }
 
+grep -q picollector_update /etc/crontab || {
+  echo "Adding picollector_update.sh to crontab every 2 minutes ..."
+  echo "*/2 *   * * *   root    $(pwd)/PiCollector/scripts/picollector_update.sh" | tee -a /etc/crontab
+}
+
 node -v &> /dev/null || {
   echo "Installing nodejs ..."
   cat PiCollector/scripts/Install-Node.sh | bash
