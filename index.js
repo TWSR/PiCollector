@@ -11,6 +11,7 @@ var SerialPort = require("serialport");
 var filters = require("./filters.js");
 var record_raw = false;
 var status_ok = true;
+var raw_size = 0, index_size = 0;
 
 // https send without tls check
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
@@ -361,6 +362,8 @@ function send_index_to_server() {
                 console.log("request error: ", e);
             });
 
+            index_size += pdata.length;
+            console.log("send index:\n\traw_size: " + raw_size + ", index_size: " + index_size + "\n\ttotal: " + (raw_size + index_size));
             green_led_blink_fast();
             request.write(pdata);
             request.end();
@@ -426,6 +429,8 @@ function send_raw_to_server() {
             // console.log("request error: ", e);
         });
 
+        raw_size += post_data.length;
+        console.log("send raw:\n\traw_size: " + raw_size + ", index_size: " + index_size + "\n\ttotal: " + (raw_size + index_size));
         request.write(post_data);
         request.end();
     } catch (e) {
