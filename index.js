@@ -164,8 +164,8 @@ var GYRO_DIVIDERS = [131.0, 65.5, 32.8, 16.4];
 
 function mpu_reading() {
     var m6 = mpu.getMotion6();
-    var gyro_divider = GYRO_DIVIDERS[mpu.getFullScaleGyroRange()];
-    var accel_divider = ACCEL_DIVIDERS[mpu.getFullScaleAccelRange()];
+    var gyro_divider = GYRO_DIVIDERS[configs.mpu.GYRO_FS];
+    var accel_divider = ACCEL_DIVIDERS[configs.mpu.ACCEL_FS];
     var date = date_string_get(new Date());
     var ori = {
         alpha: m6[3] / gyro_divider,
