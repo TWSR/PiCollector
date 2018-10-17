@@ -82,6 +82,8 @@ fi
 */2 *   * * *   root    /usr/local/bin/wifi_rebooter.sh
 ```
 
+
+
 ### Before you run
 1. Make sure you have "sudo" privilege
 2. run "./scripts/prepare.sh"
