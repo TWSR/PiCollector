@@ -11,7 +11,8 @@ var SerialPort = require("serialport");
 var filters = require("./filters.js");
 var record_raw = false;
 var status_ok = true;
-var raw_size = 0, index_size = 0;
+var raw_size = 0,
+    index_size = 0;
 
 // https send without tls check
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
@@ -114,8 +115,9 @@ function parseNMEA(buf) {
         var arr = data.split(",");
         var lat = arr[2],
             lon = arr[4],
+            fix = arr[6],
             alt = arr[9];
-        if (lat === "" || lon === "")
+        if (lat === "" || lon === "" || fix != "1")
             return false;
 
         var date = date_string_get(new Date());
@@ -154,7 +156,7 @@ function saveNMEA(data) {
 function mpu_start() {
     if (mpu.initialize()) {
         setInterval(mpu_reading, 17 /* 60 Hz */ );
-    } else {        
+    } else {
         console.log("mpu9255 initialization failed ...");
         process.exit(1);
     }
@@ -165,13 +167,17 @@ var GYRO_DIVIDERS = [131.0, 65.5, 32.8, 16.4];
 
 function mpu_reading() {
     var m6 = mpu.getMotion6();
+    var m9 = mpu.getMotion9();
     var gyro_divider = GYRO_DIVIDERS[configs.mpu.GYRO_FS];
     var accel_divider = ACCEL_DIVIDERS[configs.mpu.ACCEL_FS];
     var date = date_string_get(new Date());
     var ori = {
-        alpha: m6[3] / gyro_divider,
-        beta: m6[4] / gyro_divider,
-        gamma: m6[5] / gyro_divider,
+        // alpha: m6[3] / gyro_divider,
+        // beta: m6[4] / gyro_divider,
+        // gamma: m6[5] / gyro_divider,
+        pitch: mpu.getPitch(m9),
+        roll: mpu.getRoll(m9),
+        yaw: mpu.getYaw(m9),
         time: date
     };
     var mot = {
@@ -186,6 +192,8 @@ function mpu_reading() {
         fs.appendFileSync("./data/ori.log", JSON.stringify(ori) + "\n");
         fs.appendFileSync("./data/mot.log", JSON.stringify(mot) + "\n");
     }
+    // console.log(mot.gacc);
+    // console.log(ori);
 
     ori_filter(ori);
     var mot1 = {
@@ -274,8 +282,8 @@ function move_saved_data_to_temp_data(type) {
         arr.forEach(function(item) {
             try {
                 data.push(JSON.parse(item));
-            } catch(e) {}
-	});
+            } catch (e) {}
+        });
         fs.appendFileSync(temp_path, data.map(JSON.stringify).join("\n") + "\n", { encoding: "utf8" });
         fs.appendFileSync(saved_path, data.map(JSON.stringify).join("\n") + "\n", { encoding: "utf8" });
         remove_saved_data(type);
@@ -311,7 +319,7 @@ function remove_saved_data(type) {
 
 function send_index_to_server() {
     try {
-	if (!configs.push_url) return;
+        if (!configs.push_url) return;
         var send_url = url.parse(configs.push_url);
         // console.log("send_url: ", send_url);
         var protocol = http;
@@ -375,7 +383,7 @@ function send_index_to_server() {
 
 function send_raw_to_server() {
     try {
-	if (!configs.push_raw_url) return;
+        if (!configs.push_raw_url) return;
         var send_url = url.parse(configs.push_raw_url);
         var protocol = http;
         if (send_url.protocol === "https:") protocol = https;
@@ -438,7 +446,7 @@ function send_raw_to_server() {
     }
 }
 
-setInterval(send_raw_to_server, 10000);
+// setInterval(send_raw_to_server, 10000);
 setInterval(send_index_to_server, 10000);
 send_raw_to_server();
 send_index_to_server();
@@ -466,4 +474,3 @@ function green_led_blink_fast() {
 function green_led_blink_normal() {
     green_led_on_timeout = 800;
 }
-

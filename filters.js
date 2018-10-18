@@ -8,27 +8,11 @@ var gacc_z = [];
 var filter_post_status = "";
 var filter_post_num = 0;
 var configs = require("./config.json");
+var ssid = require("./id.json");
 
 ori_filter = function(ori) {
     ori_cache.push(ori);
     ori_cache.splice(0, ori_cache.length - cache_length);
-
-
-    // var date1 = new Date(ori_cache[ori_cache.length - 1].time.split('.')[0]);
-    // var date2 = new Date(ori_cache[0].time.split('.')[0]);
-    // if (Math.abs(date1 - date2) > 1000) { //check per sec
-    //     if (detection_onhand()) {
-    //         //filter_post_status = '手機使用中';
-    //         ori_cache = [];
-    //         mot_cache = [];
-    //         gacc_z = [];
-    //     } else {
-    //         if (filter_post_status.indexOf('手機使用中') !== -1) {
-    //             filter_post_status = '重新計算中';
-    //             console.log(filter_post_status);
-    //         }
-    //     }
-    // }
     return true;
 }
 mot_filter = function(mot) {
@@ -36,12 +20,15 @@ mot_filter = function(mot) {
     //console.log(mot.time)
     if (ori_cache.length > 0) {
 
-        var rotation_matrix = R_Matrix(ori_cache[ori_cache.length - 1].beta * Math.PI / 180.0,
-            ori_cache[ori_cache.length - 1].gamma * Math.PI / 180.0,
-            ori_cache[ori_cache.length - 1].alpha * Math.PI / 180.0);
+        // var rotation_matrix = R_Matrix(ori_cache[ori_cache.length - 1].beta * Math.PI / 180.0,
+        //     ori_cache[ori_cache.length - 1].gamma * Math.PI / 180.0,
+        //     ori_cache[ori_cache.length - 1].alpha * Math.PI / 180.0);
+        var rotation_matrix = R_Matrix(ori_cache[ori_cache.length - 1].roll * Math.PI / 180.0,
+            ori_cache[ori_cache.length - 1].pitch * Math.PI / 180.0,
+            ori_cache[ori_cache.length - 1].yaw * Math.PI / 180.0);
         var z = mot.gacc_x * rotation_matrix[0][2] + mot.gacc_y * rotation_matrix[1][2] + mot.gacc_z * rotation_matrix[2][2]
         gacc_z.push(z);
-        //console.log(z)
+        // console.log(z)
 
         mot_cache.push(mot);
         mot_cache.splice(0, mot_cache.length - cache_length);
@@ -77,10 +64,10 @@ mot_filter = function(mot) {
                 data.points = points;
 
                 if (dist_sum <= 10) {
-                    filter_post_status = '低速或靜止';
+                    filter_post_status = '低速或靜止(' + dist_sum + ')';
                     console.log(filter_post_status);
                 } else if (dist_sum >= 500) {
-                    filter_post_status = '速度異常';
+                    filter_post_status = '速度異常(' + dist_sum + ')';
                     console.log(filter_post_status);
                 } else {
                     var stdZ = standardDeviation(gacc_z);
@@ -107,7 +94,7 @@ mot_filter = function(mot) {
                         "time": d8,
                         //"smooth_index": stdZ,
                         "std_section": stdZ,
-                        "source": 'PiCollector:' + 'Test',
+                        "source": ssid.id,
                         "points": pt_str,
                         //"remark": pt_str,
                         "latlng": latlng,
