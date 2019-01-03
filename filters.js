@@ -4,6 +4,8 @@ var cache_length = 500;
 var ori_cache = [];
 var mot_cache = [];
 var geo_cache = [];
+var gacc_x = [];
+var gacc_y = [];
 var gacc_z = [];
 var filter_post_status = "";
 var filter_post_num = 0;
@@ -26,8 +28,12 @@ mot_filter = function(mot) {
             ori_cache[ori_cache.length - 1].pitch * Math.PI / 180.0,
             ori_cache[ori_cache.length - 1].yaw * Math.PI / 180.0);
         var z = mot.gacc_x * rotation_matrix[0][2] + mot.gacc_y * rotation_matrix[1][2] + mot.gacc_z * rotation_matrix[2][2]
+        var x = mot.gacc_x * rotation_matrix[0][0] + mot.gacc_y * rotation_matrix[1][0] + mot.gacc_z * rotation_matrix[2][0]
+        var y = mot.gacc_x * rotation_matrix[0][1] + mot.gacc_y * rotation_matrix[1][1] + mot.gacc_z * rotation_matrix[2][1]
         gacc_z.push(z);
-        console.log(z)
+        gacc_x.push(x);
+        gacc_y.push(y);
+        // console.log(x + " / " + y + " / " + z)
 
         mot_cache.push(mot);
         mot_cache.splice(0, mot_cache.length - cache_length);
@@ -48,6 +54,7 @@ mot_filter = function(mot) {
             } else {
                 var dist_sum = 0;
                 var pt_str = '';
+                var height_str = '';
                 var data = {};
                 var points = [];
                 var smooth_index = [];
@@ -55,6 +62,7 @@ mot_filter = function(mot) {
                 for (var i = 0; i < geo_temp.length; i++) {
                     points.push([geo_temp[i].latitude, geo_temp[i].longitude]);
                     pt_str += geo_temp[i].latitude + " " + geo_temp[i].longitude + ","
+                    height_str += geo_temp[i].altitude + ","
                     if (i != 0) {
                         dist_sum += distFromlatlng(geo_temp[i - 1].latitude, geo_temp[i - 1].longitude, geo_temp[i].latitude, geo_temp[i].longitude);
                     }
@@ -98,11 +106,15 @@ mot_filter = function(mot) {
                         "points": pt_str,
                         //"remark": pt_str,
                         "latlng": latlng,
-                        "uuid": configs.uuid,
+                        // "uuid": configs.uuid,
                         "vehicle_type": configs.vehicle,
                         "user": configs.name,
                         "geolocation_accuracy": geolocation_accuracy,
-                        "geolocation_speed": geolocation_speed
+                        "geolocation_speed": geolocation_speed,
+                        "height": height_str,
+                        "x_sec": std_sec(gacc_x, geo_temp.length).join(),
+                        "y_sec": std_sec(gacc_y, geo_temp.length).join(),
+                        "z_sec": std_sec(gacc_z, geo_temp.length).join()
                     });
                     // $.post('/insertDB', postdata);
                     //$.post(configs.push_url, postdata);
@@ -114,10 +126,14 @@ mot_filter = function(mot) {
 
                     mot_cache = [];
                     gacc_z = [];
+                    gacc_x = [];
+                    gacc_y = [];
                     return postdata;
                 }
             }
             mot_cache = [];
+            gacc_x = [];
+            gacc_y = [];
             gacc_z = [];
         }
     }
@@ -275,6 +291,38 @@ function standardDeviation(values) {
 
     var stdDev = Math.sqrt(avgSquareDiff);
     return stdDev;
+}
+
+function std_sec(values, length) {
+    var arr = array_separation(values, length);
+    var result = [];
+    for (var i = 0; i < length; i++) {
+        var avg = average(arr[i]);
+
+        var squareDiffs = arr[i].map(function(value) {
+            var diff = value - avg;
+            var sqrDiff = diff * diff;
+            return sqrDiff;
+        });
+
+        var avgSquareDiff = average(squareDiffs);
+        var stdDev = Math.sqrt(avgSquareDiff);
+        result.push(stdDev.toFixed(5));
+    }
+    return result;
+}
+
+function array_separation(values, length) {
+    var result = [];
+    var n = values.length / length;
+    for (var i = 0; i < length; i++) {
+        if (i != length - 1) {
+            result.push(values.splice(0, n));
+        } else {
+            result.push(values);
+        }
+    }
+    return result;
 }
 
 function average(data) {

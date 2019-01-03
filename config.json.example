@@ -12,12 +12,12 @@
         "baudrate": 4800
     },
     "port_number": 3000,
-    "name": "picollector2",
+    "name": "pi",
     "vehicle": "car",
     "uuid": "856ae70f-7bcc-11e7-8888-00aabbccddee",
     "push_raw_url": "https://collector.flataiwan.com/recorder",
-    "push_url": "https://collector.flataiwan.com/insertDB",
-    "id": "PiCollector:008:Z",
+    "push_url": "https://www.flataiwan.com/post/insertDB",
+    "id": "PiCollector:HaurTest",
     "debug": true,
     "send_size_show": true
 }

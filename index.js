@@ -187,26 +187,45 @@ function mpu_reading() {
     var accel_divider = ACCEL_DIVIDERS[configs.mpu.ACCEL_FS];
     var date = date_string_get(new Date());
 
+    var mot = {
+        gacc: {
+            x: m9[0] / accel_divider,
+            y: m9[1] / accel_divider,
+            z: m9[2] / accel_divider,
+        },
+        time: date
+    };
 
+    // var ang = calcOri(m9)
     var ori = {
         // alpha: m6[3] / gyro_divider,
         // beta: m6[4] / gyro_divider,
         // gamma: m6[5] / gyro_divider,
-        pitch: mpu.getPitch(m9),
-        roll: mpu.getRoll(m9),
-        // yaw: mpu.getYaw(m9),
-        yaw: calcHeading(m9[6], m9[7]),
+
+        // pitch: mpu.getPitch(m9),
+        // roll: mpu.getRoll(m9),
+        // yaw: calcYaw(m9, mpu.getRoll(m9) / 180 * 3.14, mpu.getPitch(m9) / 180 * 3.14),
+
+        // pitch: ang[1],
+        // roll: ang[0],
+        // yaw: ang[2],
+
+        pitch: 180 * Math.atan(mot.gacc.x / Math.sqrt(mot.gacc.y * mot.gacc.y + mot.gacc.z * mot.gacc.z)) / 3.14,
+        roll: 180 * Math.atan(mot.gacc.y / Math.sqrt(mot.gacc.x * mot.gacc.x + mot.gacc.z * mot.gacc.z)) / 3.14,
+        yaw: 180 * Math.atan(Math.sqrt(mot.gacc.x * mot.gacc.x + mot.gacc.x * mot.gacc.x) / mot.gacc.y) / 3.14,
+
         time: date
     };
-    console.log(ori);
-    var mot = {
-        gacc: {
-            x: m6[0] / accel_divider,
-            y: m6[1] / accel_divider,
-            z: m6[2] / accel_divider,
-        },
-        time: date
-    };
+    // console.log(ori)
+
+
+
+    // var test = {
+    //     pitch: 180 * Math.atan(mot.gacc.x / Math.sqrt(mot.gacc.y * mot.gacc.y + mot.gacc.z * mot.gacc.z)) / 3.14,
+    //     roll: 180 * Math.atan(mot.gacc.y / Math.sqrt(mot.gacc.x * mot.gacc.x + mot.gacc.z * mot.gacc.z)) / 3.14,
+    //     yaw: 180 * Math.atan(mot.gacc.z / Math.sqrt(mot.gacc.x * mot.gacc.x + mot.gacc.z * mot.gacc.z)) / 3.14,
+    // }
+
     if (record_raw) {
         fs.appendFileSync("./data/ori.log", JSON.stringify(ori) + "\n");
         fs.appendFileSync("./data/mot.log", JSON.stringify(mot) + "\n");
@@ -221,11 +240,11 @@ function mpu_reading() {
         gacc_z: mot.gacc.z,
         time: mot.time
     };
-    // var index = mot_filter(mot1);
-    // if (index) {
-    //     // console.log(index);
-    //     fs.appendFileSync("./data/index.log", JSON.stringify(index) + "\n");
-    // }
+    var index = mot_filter(mot1);
+    if (index) {
+        // console.log(index);
+        fs.appendFileSync("./data/index.log", JSON.stringify(index) + "\n");
+    }
 }
 
 mpu_start();
@@ -534,4 +553,18 @@ function calcHeading(x, y) {
     }
 
     return heading;
+}
+
+function calcOri(m9) {
+    var accel_divider = ACCEL_DIVIDERS[configs.mpu.ACCEL_FS];
+
+    var accX = m9[0] / accel_divider;
+    var accY = m9[1] / accel_divider;
+    var accZ = m9[2] / accel_divider;
+
+    var pitch = Math.atan(accX / (accY * accY + accZ * accZ));
+    var roll = Math.atan(accY / (accY * accY + accZ * accZ));
+    var Yh = (m9[7] * Math.cos(roll)) + (m9[8] * Math.sin(roll));
+    var Xh = (m9[6] * Math.cos(pitch)) + (m9[7] * Math.sin(roll) * Math.sin(pitch)) + (m9[8] * Math.cos(roll) * Math.sin(pitch));
+    return [roll / 3.14 * 180, pitch / 3.14 * 180, Math.atan2(-Yh, Xh) / 3.14 * 180];
 }
