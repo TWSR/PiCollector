@@ -13,6 +13,7 @@ var record_raw = false;
 var status_ok = true;
 var raw_size = 0,
     index_size = 0;
+var request = require('request');
 
 // https send without tls check
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
@@ -117,8 +118,10 @@ function parseNMEA(buf) {
             lon = arr[4],
             fix = arr[6],
             alt = arr[9];
-        if (lat === "" || lon === "" || fix != "1")
+        if (lat === "" || lon === "" || fix != "1") {
+            // console.log(arr);
             return false;
+        }
 
         var date = date_string_get(new Date());
         var geo = {
@@ -127,7 +130,8 @@ function parseNMEA(buf) {
             altitude: alt,
             number_satellites: arr[7],
             hdop: arr[8],
-            time: date
+            time: date,
+            fix: fix
         };
         return geo;
     }
@@ -140,16 +144,27 @@ function saveNMEA(data) {
     if (record_raw) {
         fs.appendFileSync("./data/geo.log", JSON.stringify(data) + "\n");
     }
-    var geo = {
-        latitude: data.latitude,
-        longitude: data.longitude,
-        // latitude: data.latitude + Math.random() / 1000.0,
-        // longitude: data.longitude + Math.random() / 1000.0,
-        altitude: data.altitude,
-        accuracy: data.hdop,
-        time: data.time
-    };
-    if (geo_filter(geo) === false) return;
+    if (configs.debug) {
+        var geo = {
+            latitude: 25.058 + Math.random() / 1000.0,
+            longitude: 121.524 + Math.random() / 1000.0,
+            altitude: 99,
+            accuracy: -1,
+            time: data.time
+        };
+        if (geo_filter(geo) === false) return;
+    } else {
+        if (data.fix == 1) {
+            var geo = {
+                latitude: data.latitude,
+                longitude: data.longitude,
+                altitude: data.altitude,
+                accuracy: data.hdop,
+                time: data.time
+            };
+            if (geo_filter(geo) === false) return;
+        }
+    }
     //console.log('push geo');
 }
 
@@ -171,15 +186,19 @@ function mpu_reading() {
     var gyro_divider = GYRO_DIVIDERS[configs.mpu.GYRO_FS];
     var accel_divider = ACCEL_DIVIDERS[configs.mpu.ACCEL_FS];
     var date = date_string_get(new Date());
+
+
     var ori = {
         // alpha: m6[3] / gyro_divider,
         // beta: m6[4] / gyro_divider,
         // gamma: m6[5] / gyro_divider,
         pitch: mpu.getPitch(m9),
         roll: mpu.getRoll(m9),
-        yaw: mpu.getYaw(m9),
+        // yaw: mpu.getYaw(m9),
+        yaw: calcHeading(m9[6], m9[7]),
         time: date
     };
+    console.log(ori);
     var mot = {
         gacc: {
             x: m6[0] / accel_divider,
@@ -202,11 +221,11 @@ function mpu_reading() {
         gacc_z: mot.gacc.z,
         time: mot.time
     };
-    var index = mot_filter(mot1);
-    if (index) {
-        // console.log(index);
-        fs.appendFileSync("./data/index.log", JSON.stringify(index) + "\n");
-    }
+    // var index = mot_filter(mot1);
+    // if (index) {
+    //     // console.log(index);
+    //     fs.appendFileSync("./data/index.log", JSON.stringify(index) + "\n");
+    // }
 }
 
 mpu_start();
@@ -338,43 +357,72 @@ function send_index_to_server() {
         // console.log(req_data.length);
 
         req_data.forEach(pdata => {
-            var options = {
-                hostname: send_url.hostname,
-                port: send_url.port,
-                path: send_url.path,
+            // console.log(pdata);
+            // console.log(configs.push_url);
+
+            request({
+                url: configs.push_url,
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded",
-                    "Content-Length": pdata.length,
-                    "Cookie": cookies
+                json: true,
+                // body: { a: 'a', b: 'b' }
+                body: { data: pdata }
+            }, function(error, response, body) {
+                if (error) {
+                    console.log(error);
+                    // console.log(response);
+                } else {
+                    // console.log('POST OK ' + pdata);
                 }
-            };
-
-            var request = protocol.request(options, function(res) {
-                // console.log("res status: ", res.statusCode);
-                var res_data = "";
-                res.on("data", function(chunk) {
-                    res_data += chunk;
-                });
-
-                res.on("end", function() {
-                    // console.log("res_data: ", res_data);
-                    green_led_blink_normal();
-                    if (res.statusCode === 200) {
-                        short_types_temp.forEach(remove_saved_data);
-                    }
-                });
             });
 
-            request.on("error", function(e) {
-                console.log("request error: ", e);
-            });
+            // request.post(
+            //     configs.push_url, pdata,
+            //     function(error, response, body) {
+            //         if (!error && response.statusCode == 200) {
+            //             console.log(body)
+            //         }
+            //     }
+            // );
+            // var options = {
+            //     hostname: send_url.hostname,
+            //     port: send_url.port,
+            //     path: send_url.path,
+            //     method: "POST",
+            //     headers: {
+            //         "Content-Type": "application/x-www-form-urlencoded",
+            //         "Content-Length": pdata.length,
+            //         "Cookie": cookies
+            //     }
+            // };
 
-            index_size += pdata.length;
-            console.log("send index:\n\traw_size: " + raw_size + ", index_size: " + index_size + "\n\ttotal: " + (raw_size + index_size));
-            green_led_blink_fast();
-            request.write(pdata);
-            request.end();
+            // var request = protocol.request(options, function(res) {
+            //     // console.log("res status: ", res.statusCode);
+            //     var res_data = "";
+            //     res.on("data", function(chunk) {
+            //         res_data += chunk;
+            //     });
+
+            //     res.on("end", function() {
+            //         // console.log("res_data: ", res_data);
+            //         green_led_blink_normal();
+            //         if (res.statusCode === 200) {
+            //             short_types_temp.forEach(remove_saved_data);
+            //         }
+            //     });
+            // });
+
+            // request.on("error", function(e) {
+            //     console.log("request error: ", e);
+            // });
+
+            // index_size += pdata.length;
+            // if (configs.send_size_show) {
+            //     console.log("send index:\n\traw_size: " + raw_size + ", index_size: " + index_size + "\n\ttotal: " + (raw_size + index_size));
+            // }
+            // green_led_blink_fast();
+            // console.log(pdata)
+            // request.write(querystring.stringify(pdata));
+            // request.end();
         });
     } catch (e) {
         console.log(e);
@@ -453,6 +501,7 @@ send_index_to_server();
 
 httpServer.listen(configs.port_number, function() {
     console.log("http listening 0.0.0.0:" + configs.port_number);
+    console.log('Debug Mode:' + configs.debug);
 });
 
 var green_led_on_timeout = 800;
@@ -473,4 +522,16 @@ function green_led_blink_fast() {
 
 function green_led_blink_normal() {
     green_led_on_timeout = 800;
+}
+
+function calcHeading(x, y) {
+    var heading = Math.atan2(y, x) * 180 / Math.PI;
+
+    if (heading < -180) {
+        heading += 360;
+    } else if (heading > 180) {
+        heading -= 360;
+    }
+
+    return heading;
 }

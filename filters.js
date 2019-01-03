@@ -8,7 +8,6 @@ var gacc_z = [];
 var filter_post_status = "";
 var filter_post_num = 0;
 var configs = require("./config.json");
-var ssid = require("./id.json");
 
 ori_filter = function(ori) {
     ori_cache.push(ori);
@@ -28,7 +27,7 @@ mot_filter = function(mot) {
             ori_cache[ori_cache.length - 1].yaw * Math.PI / 180.0);
         var z = mot.gacc_x * rotation_matrix[0][2] + mot.gacc_y * rotation_matrix[1][2] + mot.gacc_z * rotation_matrix[2][2]
         gacc_z.push(z);
-        // console.log(z)
+        console.log(z)
 
         mot_cache.push(mot);
         mot_cache.splice(0, mot_cache.length - cache_length);
@@ -70,6 +69,7 @@ mot_filter = function(mot) {
                     filter_post_status = '速度異常(' + dist_sum + ')';
                     console.log(filter_post_status);
                 } else {
+                    // console.log(dist_sum)
                     var stdZ = standardDeviation(gacc_z);
                     var latlng = geo_temp[parseInt(geo_temp.length / 2)].latitude + ' ' + geo_temp[parseInt(geo_temp.length / 2)].longitude;
 
@@ -94,7 +94,7 @@ mot_filter = function(mot) {
                         "time": d8,
                         //"smooth_index": stdZ,
                         "std_section": stdZ,
-                        "source": ssid.id,
+                        "source": configs.id,
                         "points": pt_str,
                         //"remark": pt_str,
                         "latlng": latlng,
