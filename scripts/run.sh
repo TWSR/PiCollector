@@ -3,6 +3,7 @@
 USER=$(stat -c "%U" $(realpath $0))
 BASEDIR=$(realpath $(dirname $(realpath $0))/..)
 DATE=$(date +%Y%m%d_%H%M%S)
+chown -R $USER:$USER $BASEDIR
 $BASEDIR/scripts/privilege.sh
 
 su $USER -c " \
