@@ -1,4 +1,4 @@
-var configs = require("./config.json");
+var configs = require("./.config.json");
 var fs = require("fs");
 var uuidv1 = require("uuid/v1");
 var url = require("url");
@@ -86,7 +86,7 @@ function mac_address_get() {
 }
 
 function save_configs() {
-    fs.writeFileSync("./config.json", JSON.stringify(configs, null, 2 /* indent 2 spaces */ ), {
+    fs.writeFileSync("./.config.json", JSON.stringify(configs, null, 2 /* indent 2 spaces */ ), {
         encoding: "utf8",
         mode: parseInt("0400", 8)
     });

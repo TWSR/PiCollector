@@ -9,7 +9,7 @@ var gacc_y = [];
 var gacc_z = [];
 var filter_post_status = "";
 var filter_post_num = 0;
-var configs = require("./config.json");
+var configs = require("./.config.json");
 
 ori_filter = function(ori) {
     ori_cache.push(ori);

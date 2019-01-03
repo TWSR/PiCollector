@@ -45,7 +45,7 @@
  */
 
 // Instantiate and initialize.
-var configs = require("../config.json");
+var configs = require("../.config.json");
 var mpu9250 = require('mpu9250');
 // var mpu = new mpu9250({
 //     device: '/dev/i2c-1',
