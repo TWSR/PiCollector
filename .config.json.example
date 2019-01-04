@@ -14,7 +14,7 @@
     "port_number": 3000,
     "name": "pi",
     "vehicle": "car",
-    "uuid": "856ae70f-7bcc-11e7-8888-00aabbccddee",
+    "uuid": "",
     "push_raw_url": "https://collector.flataiwan.com/recorder",
     "push_url": "https://www.flataiwan.com/post/insertDB",
     "id": "PiCollector:HaurTest",
