@@ -18,6 +18,6 @@
     "push_raw_url": "https://collector.flataiwan.com/recorder",
     "push_url": "https://www.flataiwan.com/post/insertDB",
     "id": "PiCollector:HaurTest",
-    "debug": true,
+    "debug": false,
     "send_size_show": true
 }
