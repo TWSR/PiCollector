@@ -5,9 +5,11 @@
   exit 1
 }
 
+
 USER=$(stat -c "%U" $(realpath $0))
 BASEDIR=$(realpath $(dirname $0)/..)
 
+su $USER -c "cd $BASEDIR; git fetch"
 cd $BASEDIR
 [ -n "$(git status | grep behind)" ] && {
   now=$(date '+[%Y/%m/%d %H:%M:%S]')
