@@ -390,6 +390,7 @@ function send_index_to_server() {
                     console.log(error);
                     // console.log(response);
                 } else {
+                    short_types_temp.forEach(remove_saved_data); 		   
                     // console.log('POST OK ' + pdata);
                 }
             });
