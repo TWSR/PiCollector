@@ -106,7 +106,7 @@ mot_filter = function(mot) {
                         "points": pt_str,
                         //"remark": pt_str,
                         "latlng": latlng,
-                        // "uuid": configs.uuid,
+                        "uuid": configs.uuid,
                         "vehicle_type": configs.vehicle,
                         "user": configs.name,
                         "geolocation_accuracy": geolocation_accuracy,
